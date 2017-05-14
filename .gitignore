@@ -45,3 +45,16 @@ $RECYCLE.BIN/
 Network Trash Folder
 Temporary Items
 .apdisk
+*.txt
+.vs/DSO_PL_SIM_W/v14/.suo
+*.ilk
+Debug/DSO_PL_SIM_W.exe
+*.sln
+DSO_PL_SIM_W.VC.db
+*.tlog
+*.log
+DSO_PL_SIM_W/Debug/Simulation.obj
+*.idb
+*.pdb
+DSO_PL_SIM_W/DSO_PL_SIM_W.vcxproj
+DSO_PL_SIM_W/DSO_PL_SIM_W.vcxproj.filters
