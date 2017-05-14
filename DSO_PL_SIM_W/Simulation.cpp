@@ -84,6 +84,7 @@ void Simulation_Result(UE *UEList, SimulationResult *Result)
 
 	// 計算整體的throughput、delay、schedule packet數、discard packet數
 	double DelayTemp = 0.0;
+	double SystemTimeTemp = 0.0;
 	double Type1_DelayTemp = 0.0;
 	double Type2_DelayTemp = 0.0;
 	double Type3_DelayTemp = 0.0;
@@ -91,11 +92,13 @@ void Simulation_Result(UE *UEList, SimulationResult *Result)
 	{
 		Result->TotalThroughput = Result->TotalThroughput + Result->Throughput[i];
 		DelayTemp = DelayTemp + (Result->Delay[i] / Result->SchedulePackerNum[i]);
+		SystemTimeTemp = SystemTimeTemp + (Result->SystemTime[i] / Result->SchedulePackerNum[i]);
 		Result->TotalSchedulePacketNum = Result->TotalSchedulePacketNum + Result->SchedulePackerNum[i];
 		Result->TotalDiscardPacketNum = Result->TotalDiscardPacketNum + Result->DiscardPacketNum[i];
 	}
 	Result->AverageThroughput = Result->TotalThroughput / UEnumber;
 	Result->AverageDelay = DelayTemp / UEnumber;
+	Result->AverageSystemTime = SystemTimeTemp / UEnumber;
 	Result->PacketLossRatio = ((double)Result->TotalDiscardPacketNum / (double)(Result->TotalSchedulePacketNum + Result->TotalDiscardPacketNum)) * 100;
 
 	// 計算typ1(VoIP)的throughput、delay、schedule packet數、discard packet數、rate滿意度、delay滿意度
@@ -173,7 +176,7 @@ void OutputResult(string Scheme, SimulationResult *Result)
 	else
 	{
 		Write_SimulationResultFile << Scheme << endl;
-		Write_SimulationResultFile << (Result->TotalThroughput * 1000 / simulation_time) * 1000 << " " << Result->AverageDelay << " " << Result->AvgSystemTime << endl;
+		Write_SimulationResultFile << (Result->TotalThroughput * 1000 / simulation_time) * 1000 << " " << Result->AverageSystemTime << " " << Result->AvgSystemTime << endl;
 		//Write_SimulationResultFile << (Result->AverageThroughput * 1000 / TTI) * 1000 << endl;
 		//Write_SimulationResultFile << Result->AverageDelay << endl;
 		//Write_SimulationResultFile << Result->PacketLossRatio << endl;
@@ -317,7 +320,8 @@ void EqualRB(int t, BufferStatus *Queue, UE *UE, SimulationResult *Result)
 			else													//第一個packet size比RB可攜帶的資料量小
 			{
 				RBSizeSpace = RBSizeSpace - Queue->HeadPacketSize[i];
-				Result->Delay[i] = Result->Delay[i] + ((t + 1) - Queue->PacketArrivalTime[i][0]);    // 計算每一個packet delay
+				Result->Delay[i] = Result->Delay[i] + ((t + 1) - Queue->PacketArrivalTime[i][0]);	// 計算每一個packet delay
+				Result->SystemTime[i] = Result->SystemTime[i] + ((t + 1) - Queue->PacketArrivalTime[i][0]) + UEList[i].packet_size / CarryBit;		// 計算傳送到UE的時間
 				Queue->PacketArrivalTime[i].erase(Queue->PacketArrivalTime[i].begin());
 				Result->SchedulePackerNum[i] = Result->SchedulePackerNum[i] + 1;
 				Queue->PacketHOLDelay[i].erase(Queue->PacketHOLDelay[i].begin());
